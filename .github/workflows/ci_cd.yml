@@ -52,18 +52,18 @@ jobs:
           host: ${{ secrets.AWS_VM_IP }}
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}
-        run: |
-          # Vérifier l'état de MySQL et le redémarrer si nécessaire
-          sudo systemctl status mysql || sudo systemctl start mysql
+          script: |
+            # Vérifier l'état de MySQL et le redémarrer si nécessaire
+            sudo systemctl status mysql || sudo systemctl start mysql
 
-          # Assurez-vous que la base de données est prête avant de démarrer l'application
-          until mysql -u root -p'{{ secrets.MYSQL_ROOT_PASSWORD }}' -e "USE geo_location"; do
-            echo "Waiting for MySQL to be ready..."
-            sleep 5
-          done
+            # Assurez-vous que la base de données est prête avant de démarrer l'application
+            until mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' -e "USE geo_location"; do
+              echo "Waiting for MySQL to be ready..."
+              sleep 5
+            done
 
-          # Arrêter l'ancienne instance de l'application si elle est en cours
-          pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
+            # Arrêter l'ancienne instance de l'application si elle est en cours
+            pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
 
-          # Démarrer la nouvelle version de l'application avec les informations de connexion MySQL
-          nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
+            # Démarrer la nouvelle version de l'application avec les informations de connexion MySQL
+            nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
