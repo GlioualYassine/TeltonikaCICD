@@ -3,10 +3,10 @@ name: CI/CD for Spring Boot Application with MySQL Connection
 on:
   push:
     branches:
-      - newBackend  # Déclenche l'action lors d'un push sur la branche 'newBackend'
+      - develop  # Déclenche l'action lors d'un push sur la branche 'newBackend'
   pull_request:
     branches:
-      - newBackend
+      - develop
 
 jobs:
   build:
