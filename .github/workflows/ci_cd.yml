@@ -59,15 +59,7 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
           port: 22
           script: |
-            # Vérifier l'état de MySQL et le redémarrer si nécessaire
-            sudo systemctl status mysql || sudo systemctl start mysql
-
-            # Assurez-vous que la base de données est prête avant de démarrer l'application
-            until mysql -u root -p'' -e "USE geo_location"; do
-              echo "Waiting for MySQL to be ready..."
-              sleep 5
-            done
-
+            
             # Arrêter l'ancienne instance de l'application si elle est en cours
             pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
 
