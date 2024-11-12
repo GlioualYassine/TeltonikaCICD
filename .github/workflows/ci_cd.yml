@@ -59,9 +59,11 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
           port: 22
           script: |
-            
             # Arrêter l'ancienne instance de l'application si elle est en cours
             pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
 
             # Démarrer la nouvelle version de l'application avec les informations de connexion MySQL
-            nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
+            nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 & disown
+
+            # Pause pour permettre le démarrage de l'application
+            sleep 5
