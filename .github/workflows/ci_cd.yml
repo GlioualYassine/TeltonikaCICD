@@ -63,7 +63,7 @@ jobs:
             pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
 
             # Démarrer la nouvelle version de l'application avec les informations de connexion MySQL
-            nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 & disown
+            setsid nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
 
             # Pause pour permettre le démarrage de l'application
             sleep 5
