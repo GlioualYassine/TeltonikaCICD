@@ -30,6 +30,7 @@ jobs:
           mysql -u root -p"$MYSQL_PWD" -e "CREATE DATABASE IF NOT EXISTS geo_location;"
           mysql -u root -p"$MYSQL_PWD" -e "GRANT ALL PRIVILEGES ON geo_location.* TO 'root'@'localhost';"
           mysql -u root -p"$MYSQL_PWD" -e "FLUSH PRIVILEGES;"
+
           
 
   build:
