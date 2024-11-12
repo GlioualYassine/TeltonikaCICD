@@ -3,7 +3,7 @@ name: CI/CD for Spring Boot Application with MySQL Connection
 on:
   push:
     branches:
-      - develop  # Déclenche l'action lors d'un push sur la branche 'newBackend'
+      - develop
   pull_request:
     branches:
       - develop
@@ -19,8 +19,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-            java-version: '17'
-            distribution: 'temurin'
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Cache Maven packages
         uses: actions/cache@v2
@@ -33,13 +33,16 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      - name: List files in target directory
+        run: ls -la target  # Cette étape permet de vérifier la présence du fichier .jar dans les logs
+
       - name: Upload JAR via SCP
         uses: appleboy/scp-action@v0.0.5
         with:
           host: ${{ secrets.AWS_VM_IP }}
           username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}
-          source: target/geolocation_api-0.0.1-SNAPSHOT.jar
+          key: ${{ secrets.AWS_SSH_KEY }}  # Utilisez la clé privée en format PEM
+          source: target/*.jar  # Utilisez un joker pour capturer tout fichier .jar généré
           target: /home/ubuntu/geolocation_api.jar
 
   deploy:
