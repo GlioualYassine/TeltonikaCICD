@@ -40,9 +40,9 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
+          username: ubuntu
+          password: ${{ secrets.PASSWORD }}  # Utilisez un mot de passe si nécessaire
+          port: 22
           source: "target/*.jar"
           target: "/home/ubuntu/geolocation_api.jar"
 
@@ -54,11 +54,10 @@ jobs:
       - name: SSH into AWS VM and Configure MySQL Connection
         uses: appleboy/ssh-action@v0.1.3
         with:
-          with:
-            host: 43.204.227.9
-            username: ubuntu
-            key: ${{ secrets.AWS_SSH_KEY }}  # La clé SSH ajoutée aux secrets
-            port: 22
+          host: 43.204.227.9
+          username: ubuntu
+          key: ${{ secrets.AWS_SSH_KEY }}  # La clé SSH ajoutée aux secrets
+          port: 22
           script: |
             # Vérifier l'état de MySQL et le redémarrer si nécessaire
             sudo systemctl status mysql || sudo systemctl start mysql
