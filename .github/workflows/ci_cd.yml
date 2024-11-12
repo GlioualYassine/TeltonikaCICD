@@ -39,7 +39,7 @@ jobs:
       - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
+          host: 43.204.227.9
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
           port: 22
