@@ -1,4 +1,4 @@
-name: CI/CD for Spring Boot Application with MySQL Connection
+name: CI/CD
 
 on:
   push:
@@ -9,7 +9,24 @@ on:
       - develop
 
 jobs:
+  setup-mysql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install MySQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo systemctl start mysql
+
+      - name: Configure MySQL
+        run: |
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS geo_location;"
+          sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY '';"
+          sudo mysql -e "GRANT ALL PRIVILEGES ON geo_location.* TO 'root'@'localhost';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+
   build:
+    needs: setup-mysql
     runs-on: ubuntu-latest
 
     steps:
@@ -32,9 +49,6 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
-
-#      - name: List files in target directory
-#        run: ls -la target  # Cette étape permet de vérifier la présence du fichier .jar dans les logs
 
       - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
