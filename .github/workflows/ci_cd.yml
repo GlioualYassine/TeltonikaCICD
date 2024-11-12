@@ -36,14 +36,15 @@ jobs:
       - name: List files in target directory
         run: ls -la target  # Cette étape permet de vérifier la présence du fichier .jar dans les logs
 
-      - name: Upload JAR via SCP
-        uses: appleboy/scp-action@v0.0.5
+      - name: Upload JAR via SCP with Password Authentication
+        uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.AWS_VM_IP }}
-          username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}  # Utilisez la clé privée en format PEM
-          source: target/*.jar  # Utilisez un joker pour capturer tout fichier .jar généré
-          target: /home/ubuntu/geolocation_api.jar
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "target/*.jar"
+          target: "/home/ubuntu/geolocation_api.jar"
 
   deploy:
     needs: build
@@ -53,9 +54,11 @@ jobs:
       - name: SSH into AWS VM and Configure MySQL Connection
         uses: appleboy/ssh-action@v0.1.3
         with:
-          host: ${{ secrets.AWS_VM_IP }}
-          username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}
+          with:
+            host: 43.204.227.9
+            username: ubuntu
+            key: ${{ secrets.AWS_SSH_KEY }}  # La clé SSH ajoutée aux secrets
+            port: 22
           script: |
             # Vérifier l'état de MySQL et le redémarrer si nécessaire
             sudo systemctl status mysql || sudo systemctl start mysql
