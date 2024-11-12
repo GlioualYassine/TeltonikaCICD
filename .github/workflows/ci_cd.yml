@@ -58,7 +58,7 @@ jobs:
             sudo systemctl status mysql || sudo systemctl start mysql
 
             # Assurez-vous que la base de données est prête avant de démarrer l'application
-            until mysql -u root -p'${{ secrets.MYSQL_ROOT_PASSWORD }}' -e "USE geo_location"; do
+            until mysql -u root -p'' -e "USE geo_location"; do
               echo "Waiting for MySQL to be ready..."
               sleep 5
             done
