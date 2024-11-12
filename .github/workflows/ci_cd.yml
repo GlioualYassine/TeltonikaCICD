@@ -36,12 +36,12 @@ jobs:
       - name: List files in target directory
         run: ls -la target  # Cette étape permet de vérifier la présence du fichier .jar dans les logs
 
-      - name: Upload JAR via SCP with Password Authentication
+      - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu
-          password: ${{ secrets.PASSWORD }}  # Utilisez un mot de passe si nécessaire
+          key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
           port: 22
           source: "target/*.jar"
           target: "/home/ubuntu/geolocation_api.jar"
