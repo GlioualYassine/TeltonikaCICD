@@ -18,17 +18,20 @@ jobs:
           sudo apt-get install -y mysql-server
           sudo systemctl start mysql
 
-      - name: Set MySQL root password and configure database
-        env:
-          MYSQL_PWD: temp_password # Remplacez par un mot de passe sécurisé si nécessaire
+      - name: Configure MySQL root user for password authentication
         run: |
-          # Configurer le mot de passe pour l'utilisateur root
-          sudo mysqladmin -u root password "$MYSQL_PWD"
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'temp_password';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
 
-          # Créer la base de données et configurer l'utilisateur avec le mot de passe
+      - name: Set up MySQL database and permissions
+        env:
+          MYSQL_PWD: temp_password
+        run: |
           mysql -u root -p"$MYSQL_PWD" -e "CREATE DATABASE IF NOT EXISTS geo_location;"
           mysql -u root -p"$MYSQL_PWD" -e "GRANT ALL PRIVILEGES ON geo_location.* TO 'root'@'localhost';"
           mysql -u root -p"$MYSQL_PWD" -e "FLUSH PRIVILEGES;"
+          
+
   build:
     needs: setup-mysql
     runs-on: ubuntu-latest
