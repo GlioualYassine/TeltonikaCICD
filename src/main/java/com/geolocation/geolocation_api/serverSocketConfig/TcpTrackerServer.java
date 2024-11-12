@@ -1,6 +1,8 @@
 package com.geolocation.geolocation_api.serverSocketConfig;
 
+import com.geolocation.geolocation_api.repository.GpsDeviceRepository;
 import com.geolocation.geolocation_api.repository.PositionRepository;
+import com.geolocation.geolocation_api.repository.UserRepository;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -13,6 +15,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
@@ -27,6 +30,9 @@ public class TcpTrackerServer {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private final PositionRepository positionRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
+    private final GpsDeviceRepository gpsDeviceRepository;
     @PostConstruct
     public void startServer() throws InterruptedException {
         bossGroup = new NioEventLoopGroup(1);
@@ -42,7 +48,7 @@ public class TcpTrackerServer {
                         protected void initChannel(SocketChannel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new LoggingHandler(LogLevel.INFO));  // Log activity
-                            pipeline.addLast(new TeltonikaCodec8DecoderHandler(positionRepository));  // Decode FMB920 messages
+                            pipeline.addLast(new TeltonikaCodec8DecoderHandler(positionRepository,messagingTemplate,userRepository,gpsDeviceRepository));  // Decode FMB920 messages
                             pipeline.addLast(new TeltonikaAckHandler());  // Handle ACKs
                         }
                     });

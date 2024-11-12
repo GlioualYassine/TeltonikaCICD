@@ -37,11 +37,11 @@ public class TeltonikaCodec8DecoderHandler extends ChannelInboundHandlerAdapter 
     public static final int CODEC_16 = 0x10;
     private final PositionRepository positionRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    //private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final GpsDeviceRepository gpsDeviceRepository;
     private static final Logger logger = LoggerFactory.getLogger(TeltonikaCodec8DecoderHandler.class);
     private boolean imeiReceived = false;
+    //private final AuthenticationService authenticationService;
 
 
 
