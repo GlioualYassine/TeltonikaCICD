@@ -1,4 +1,4 @@
-name: CI/CD for Spring Boot Application with MySQL Connection
+name: CI/CD for 
 
 on:
   push:
