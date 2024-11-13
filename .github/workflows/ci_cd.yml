@@ -65,6 +65,22 @@ jobs:
             exit 1
           fi
 
+      - name: Remove old JAR file on server
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: 43.204.227.9
+          username: ubuntu
+          key: ${{ secrets.AWS_SSH_KEY }}
+          port: 22
+          script: |
+            # Supprimer l'ancien fichier JAR s'il existe
+            if [ -f "/home/ubuntu/geolocation_api-0.0.1-SNAPSHOT.jar" ]; then
+              rm /home/ubuntu/geolocation_api-0.0.1-SNAPSHOT.jar
+              echo "Ancien fichier JAR supprimé."
+            else
+              echo "Aucun ancien fichier JAR trouvé."
+            fi
+
       - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -75,20 +91,3 @@ jobs:
           source: "target/geolocation_api-0.0.1-SNAPSHOT.jar"
           target: "/home/ubuntu/"
           strip_components: 1
-
-      - name: SSH into AWS VM and Deploy Application
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: 43.204.227.9
-          username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}
-          port: 22
-          script: |
-            # Arrêter l'ancienne instance de l'application si elle est en cours
-            pgrep -f 'geolocation_api-0.0.1-SNAPSHOT.jar' && pkill -f 'geolocation_api-0.0.1-SNAPSHOT.jar' || echo "No running instance to stop."
-
-            # Démarrer la nouvelle version de l'application
-            setsid nohup java -jar /home/ubuntu/geolocation_api-0.0.1-SNAPSHOT.jar > /home/ubuntu/geolocation_api.log 2>&1 &
-
-            # Pause pour permettre le démarrage de l'application
-            sleep 5
