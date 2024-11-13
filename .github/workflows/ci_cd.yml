@@ -57,7 +57,7 @@ jobs:
           # Spécifier les variables d'environnement pour la connexion MySQL
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/geo_location
           SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: testrootpass
+          SPRING_DATASOURCE_PASSWORD:
         run: mvn clean install
 
       - name: Upload JAR via SCP with SSH Key Authentication
