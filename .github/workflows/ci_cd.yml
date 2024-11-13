@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI/CD for Spring Boot Application with MySQL Connection
 
 on:
   push:
@@ -9,37 +9,34 @@ on:
       - develop
 
 jobs:
-  setup-mysql:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install MySQL
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mysql-server
-          sudo systemctl start mysql
-
-      - name: Configure MySQL root user for password authentication
-        run: |
-          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'temp_password';"
-          sudo mysql -e "FLUSH PRIVILEGES;"
-
-      - name: Set up MySQL database and permissions
-        env:
-          MYSQL_PWD: temp_password
-        run: |
-          mysql -u root -p"$MYSQL_PWD" -e "CREATE DATABASE IF NOT EXISTS geo_location;"
-          mysql -u root -p"$MYSQL_PWD" -e "GRANT ALL PRIVILEGES ON geo_location.* TO 'root'@'localhost';"
-          mysql -u root -p"$MYSQL_PWD" -e "FLUSH PRIVILEGES;"
-
-          
-
   build:
-    needs: setup-mysql
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: geo_location
+          MYSQL_ROOT_PASSWORD:
+        ports:
+          - 3306:3306
+        options: >
+          --health-cmd="mysqladmin ping -h localhost -u root -ptestrootpass" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=3
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+
+      - name: Wait for MySQL to be ready
+        run: |
+          # Attendre que le service MySQL soit prêt
+          until mysqladmin ping -h 127.0.0.1 -u root -ptestrootpass --silent; do
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -56,6 +53,11 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build with Maven
+        env:
+          # Spécifier les variables d'environnement pour la connexion MySQL
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/geo_location
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: testrootpass
         run: mvn clean install
 
       - name: Upload JAR via SCP with SSH Key Authentication
@@ -63,7 +65,7 @@ jobs:
         with:
           host: 43.204.227.9
           username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
+          key: ${{ secrets.AWS_SSH_KEY }}
           port: 22
           source: "target/*.jar"
           target: "/home/ubuntu/geolocation_api.jar"
@@ -78,14 +80,14 @@ jobs:
         with:
           host: 43.204.227.9
           username: ubuntu
-          key: ${{ secrets.AWS_SSH_KEY }}  # Utilise la clé SSH ajoutée aux secrets
+          key: ${{ secrets.AWS_SSH_KEY }}
           port: 22
           script: |
             # Arrêter l'ancienne instance de l'application si elle est en cours
             pgrep -f 'geolocation_api.jar' && pkill -f 'geolocation_api.jar' || echo "No running instance to stop."
 
-            # Démarrer la nouvelle version de l'application avec les informations de connexion MySQL
+            # Démarrer la nouvelle version de l'application
             setsid nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
-
+            
             # Pause pour permettre le démarrage de l'application
             sleep 5
