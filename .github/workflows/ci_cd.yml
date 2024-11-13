@@ -63,8 +63,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}
           port: 22
-          source: "target/*.jar"
-          target: "/home/ubuntu/geolocation_api.jar"
+          source: "target/geolocation_api-0.0.1-SNAPSHOT.jar"  # Spécifiez le fichier JAR complet ici
+          target: "/home/ubuntu/geolocation_api.jar"  # Le fichier sera enregistré avec ce nom sur le serveur
+
 
   deploy:
     needs: build
