@@ -16,12 +16,12 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'  # Permettre à root de se connecter sans mot de passe
           MYSQL_DATABASE: geo_location
-          MYSQL_ROOT_PASSWORD:
         ports:
           - 3306:3306
         options: >
-          --health-cmd="mysqladmin ping -h localhost -u root -ptestrootpass" 
+          --health-cmd="mysqladmin ping -h localhost" 
           --health-interval=10s 
           --health-timeout=5s 
           --health-retries=3
@@ -33,7 +33,7 @@ jobs:
       - name: Wait for MySQL to be ready
         run: |
           # Attendre que le service MySQL soit prêt
-          until mysqladmin ping -h 127.0.0.1 -u root -ptestrootpass --silent; do
+          until mysqladmin ping -h 127.0.0.1 --silent; do
             echo "Waiting for MySQL..."
             sleep 5
           done
@@ -54,10 +54,10 @@ jobs:
 
       - name: Build with Maven
         env:
-          # Spécifier les variables d'environnement pour la connexion MySQL
+          # Spécifier les variables d'environnement pour la connexion MySQL sans mot de passe
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/geo_location
           SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD:
+          SPRING_DATASOURCE_PASSWORD:  # Laisser vide pour indiquer pas de mot de passe
         run: mvn clean install
 
       - name: Upload JAR via SCP with SSH Key Authentication
