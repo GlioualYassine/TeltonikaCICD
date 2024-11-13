@@ -1,4 +1,4 @@
-name: CI/CD for 
+name: CI/CD for
 
 on:
   push:
@@ -55,6 +55,15 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD:
         run: mvn clean install
+
+      - name: Verify JAR file
+        run: |
+          if [ -f "target/geolocation_api-0.0.1-SNAPSHOT.jar" ]; then
+            echo "JAR file exists. Proceeding with SCP transfer."
+          else
+            echo "JAR file not found! Check Maven build step."
+            exit 1
+          fi
 
       - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
