@@ -1,4 +1,4 @@
-name: CI/CD for
+name: CI/CD for Spring Boot Application with MySQL Connection
 
 on:
   push:
@@ -21,7 +21,6 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
           MYSQL_DATABASE: geo_location
         options: "--name=mysql_master --health-cmd=\"mysqladmin ping -h localhost\" --health-interval=10s --health-timeout=5s --health-retries=3"
-
 
     steps:
       - name: Checkout Repository
@@ -65,6 +64,12 @@ jobs:
             exit 1
           fi
 
+      - name: List files in target directory
+        run: ls -la target  # Vérifie le contenu du dossier target pour s'assurer que le fichier JAR est bien présent
+
+      - name: Set permissions for JAR file
+        run: chmod 644 target/geolocation_api-0.0.1-SNAPSHOT.jar
+
       - name: Upload JAR via SCP with SSH Key Authentication
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -72,9 +77,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}
           port: 22
-          source: "target/geolocation_api-0.0.1-SNAPSHOT.jar"  # Spécifiez le fichier JAR complet ici
-          target: "/home/ubuntu/geolocation_api.jar"  # Le fichier sera enregistré avec ce nom sur le serveur
-
+          source: "target/geolocation_api-0.0.1-SNAPSHOT.jar"
+          target: "/home/ubuntu/geolocation_api.jar"
 
   deploy:
     needs: build
@@ -94,6 +98,6 @@ jobs:
 
             # Démarrer la nouvelle version de l'application
             setsid nohup java -jar /home/ubuntu/geolocation_api.jar > /home/ubuntu/geolocation_api.log 2>&1 &
-            
+
             # Pause pour permettre le démarrage de l'application
             sleep 5
