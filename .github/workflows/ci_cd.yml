@@ -21,7 +21,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
           MYSQL_DATABASE: geo_location
         options: |
-          --name=mysql_master  # Remplacement de 'mysql-master' par 'mysql_master'
+          --name=mysql_master
           --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
           --health-timeout=5s
